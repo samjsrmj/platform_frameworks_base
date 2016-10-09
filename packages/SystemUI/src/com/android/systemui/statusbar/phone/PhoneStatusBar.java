@@ -430,6 +430,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     boolean mExpandedVisible;
 
     private boolean mDoubleTapVib;
+    // Cosmic-OS logo
+    private boolean mCosmicLogo;
+    private int mCosmicLogoColor;
+    private ImageView mCosmicLogoRight;
+    private ImageView mCosmicLogoLeft;
+    private int mCosmicLogoStyle;
 
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
@@ -585,6 +591,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                    Settings.System.BLUR_LIGHT_COLOR_PREFERENCE_KEY), false, this);
            resolver.registerContentObserver(Settings.System.getUriFor(
                    Settings.System.BLUR_MIXED_COLOR_PREFERENCE_KEY), false, this);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                   Settings.System.STATUS_BAR_COSMIC_LOGO), false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                   Settings.System.STATUS_BAR_COSMIC_LOGO_COLOR), false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                   Settings.System.STATUS_BAR_COSMIC_LOGO_STYLE), false, this, UserHandle.USER_ALL);
            update();
        }
 
@@ -641,19 +653,30 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.RECENT_APPS_SCALE_PREFERENCE_KEY, 6);
             mRadiusRecents = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.RECENT_APPS_RADIUS_PREFERENCE_KEY, 3);
-                    
+
             mBlurDarkColorFilter = Settings.System.getInt(mContext.getContentResolver(), 
                     Settings.System.BLUR_DARK_COLOR_PREFERENCE_KEY, Color.LTGRAY);
             mBlurMixedColorFilter = Settings.System.getInt(mContext.getContentResolver(), 
                     Settings.System.BLUR_MIXED_COLOR_PREFERENCE_KEY, Color.GRAY);
             mBlurLightColorFilter = Settings.System.getInt(mContext.getContentResolver(), 
                     Settings.System.BLUR_LIGHT_COLOR_PREFERENCE_KEY, Color.DKGRAY);
-                    
+
             RecentsActivity.updateBlurColors(mBlurDarkColorFilter,mBlurMixedColorFilter,mBlurLightColorFilter);
             RecentsActivity.updateRadiusScale(mScaleRecents,mRadiusRecents);
-            
+
             mQsLayoutColumns = Settings.System.getIntForUser(resolver,
                     Settings.System.QS_LAYOUT_COLUMNS, 3, mCurrentUserId);
+
+            mCosmicLogoStyle = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_COSMIC_LOGO_STYLE, 0,
+                    UserHandle.USER_CURRENT);
+            mCosmicLogo = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_COSMIC_LOGO, 0, mCurrentUserId) == 1;
+            mCosmicLogoColor = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_COSMIC_LOGO_COLOR, 0xFFFFFFFF, mCurrentUserId);
+            mCosmicLogoLeft = (ImageView) mStatusBarView.findViewById(R.id.left_cosmic_logo);
+            mCosmicLogoRight = (ImageView) mStatusBarView.findViewById(R.id.cosmic_logo);
+            showCosmicLogo(mCosmicLogo, mCosmicLogoColor, mCosmicLogoStyle);
 
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
@@ -733,7 +756,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION),
                     false, this, UserHandle.USER_ALL);
-
             update();
         }
 
@@ -4021,6 +4043,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 return deferred;
             }
         }, cancelAction, afterKeyguardGone);
+    }
+
+    public void showCosmicLogo(boolean show, int color, int style) {
+        if (mStatusBarView == null) return;
+        if (!show) {
+            mCosmicLogoRight.setVisibility(View.GONE);
+            mCosmicLogoLeft.setVisibility(View.GONE);
+            return;
+        }
+        if (color != 0xFFFFFFFF) {
+            mCosmicLogoRight.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            mCosmicLogoLeft.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        } else {
+            mCosmicLogoRight.clearColorFilter();
+            mCosmicLogoLeft.clearColorFilter();
+        }
+        if (style == 0) {
+            mCosmicLogoRight.setVisibility(View.GONE);
+            mCosmicLogoLeft.setVisibility(View.VISIBLE);
+        } else {
+            mCosmicLogoLeft.setVisibility(View.GONE);
+            mCosmicLogoRight.setVisibility(View.VISIBLE);
+        }
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

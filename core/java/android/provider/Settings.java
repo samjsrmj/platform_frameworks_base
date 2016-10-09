@@ -4502,6 +4502,27 @@ public final class Settings {
         public static final String STATUS_BAR_CARRIER_FONT_SIZE = "status_bar_carrier_font_size";
 
         /**
+         * Statusbar Cosmic logo
+         * @hide
+         */
+        public static final String STATUS_BAR_COSMIC_LOGO = "status_bar_cosmic_logo";
+
+        /**
+         * Statusbar Cosmic logo color setting
+         * @hide
+         */
+        public static final String STATUS_BAR_COSMIC_LOGO_COLOR = "status_bar_cosmic_logo_color";
+
+        /**
+         * Style of Status bar logo
+         * 0 - Left (default)
+         * 1 - Right
+         * @hide
+         */
+        public static final String STATUS_BAR_COSMIC_LOGO_STYLE = "status_bar_cosmic_logo_style";
+
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
